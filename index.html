@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#loading{
+	position:absolute;
+	top: 40%;
+	width:33%;
+	left: 33%;
+	text-align: center;
+	background-color: #CCC;
+	border-radius: 10px;
+	padding: 20px;
+	animation: loading 2s alternate infinite;
+	border: 1px solid #000;
+}
+@keyframes loading{
+	from {background-color: #CCC;}
+	to {background-color: #0C0;}
+}
+</style>
+	<meta charset="UTF-8">
+	<meta name="description" content="Write, run, debug and share python code in your browser"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<title>离线版Micro:bit模拟器</title>
+	<script src="lib/cm/codemirror.js"></script>
+	<script src="lib/cm/active-line.js"></script>
+	<script src="lib/cm/python.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="lib/cm/codemirror.css">
+    <link rel="stylesheet" href="lib/cm/cobalt.css">
+    <link rel="stylesheet" href="lib/cm/blackboard.css">
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/lib.js"></script>
+	<script src="lib/skulpt/skulpt.min.js"></script>
+	<script src="lib/skulpt/skulpt-stdlib.js"></script>
+	<link rel="stylesheet" href="lib/jquery-ui.css">
+	<script src="lib/jquery-ui.min.js"></script>
+	<script src="lib/jq/jquery.ui.touch-punch.min.js"></script>
+	<link rel="stylesheet" href="lib/font-awesome.min.css">
+	<script type="text/javascript" src="lib/loader.js"></script>
+	<script type="text/javascript" src="lib/jsapi.js"></script>
+	<link href='lib/quicksand.css' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+	<!-- Animated link-->
+	
+    <div >
+		<h1 id="title" ><font style=font-size:40px>MicroPython离线版Micro:bit模拟器</font>
+        <a  href="editor.html" target="_top">
+        	<img src="static/img/scroll-hello.gif" width="50" height="50"/>
+        </a>
+		</h1><br/>
+    </div>
+
+<div id="loading">
+运行中... 请稍等
+</div>
+<div id="holder" class="holder" style="display:none">
+
+<span id="file_tabs"><span class="file_tab file_tab_selected">mycode.py</span></span>
+<pre>
+<div id="editor"></div>
+</pre>
+</div>
+     <script>
+      // JavaScript Document
+      var python_filename = "mycode.py";
+      // var python_code = 'from microbit import *\n\ndisplay.scroll("Hello world")\nsleep(1000)';
+      var python_code =  sessionStorage.getItem("pythoncode");
+
+      PythonIDE.files[python_filename] = python_code;
+      pythonIDE.currentFile = python_filename;
+      PythonIDE.updateFileTabs();
+    </script>
+    <div id="hintBar"></div>
+    <span id="footer">
+     	<img title="显示/隐藏工具栏" alt="点击显示/隐藏工具列按钮" id="btn_tools" class="toolButton" src="media/tools.png">
+	    <img title="执行" alt="点击执行程序代码" id="btn_run" class="toolButton hiddenButton" src="media/play.png">
+    	<img title="停止" alt="点击停止执行程序代码" id="btn_stopRunning" class="toolButton hiddenButton" src="media/stop.png">
+	    <img title="主控台" alt="显示 Python 程序输出" id="btn_show_output" class="toolButton hiddenButton" src="media/console.png">
+    	<img title="设置" alt="设备定制化屏幕" id="btn_show_settings" class="toolButton hiddenButton" src="media/settings.png">
+	    <img title="返回程序代码" alt="返回上一层程序代码" id="btn_show_recover" class="toolButton hiddenButton" src="media/recover.png">
+    </span>
+    <div id="recover" title="恢复" style="display:none"></div>
+
+    <div id="dlg" title="mycode.py" style="display:none">
+        <div id="output"></div>
+    </div>
+
+    <div id="file_settings" title="文件" style="display:none">
+        <p>请注意: 如果你选择刪除文件, 你将会无法恢复它除非你存储了备份</p>
+        <label for="txt_file_name">更名文件:</label>
+        <input id="txt_file_name" name="txt_file_name" value="">
+        <button id="btn_file_rename">更名</button>
+        <button id="btn_file_delete">刪除</button>
+        <button id="btn_file_cancel">取消</button>
+    </div>
+
+    <div id="settings" title="设置" style="display:none">
+        <h3>文字尺寸</h3>
+        <label for="txt_code_size">程序代码字型尺寸:</label>
+        <input type="text" id="txt_code_size" readonly>
+        <div id="slider_code_size" class="slider"></div>
+        <label for="txt_output_size">输出字型尺寸:</label>
+        <input type="text" id="txt_output_size" readonly>
+        <div id="slider_output_size" class="slider"></div>
+
+        <h3>编辑色彩</h3>
+        <div id="radio_code_style">
+            <p>灯光的色彩是适用在白天进行程序设计的. 有些人喜欢晚上写程序:</p>
+            <input type="radio" id="radio_code_style_light" name="radio_code_style" checked="checked">
+            <label for="radio_code_style_light">光亮</label>
+            <input type="radio" id="radio_code_style_dusk" name="radio_code_style">
+            <label for="radio_code_style_dusk">黃昏</label>
+            <input type="radio" id="radio_code_style_dark" name="radio_code_style">
+            <label for="radio_code_style_dark">黑暗</label>
+        </div>
+
+        <h3>输出控制台色彩</h3>
+        <p>暗黑色看起來像DOS命令提示. 较亮的色彩比較像是应用程序对话框:</p>
+        <div id="radio_output_style">
+            <input type="radio" id="radio_output_style_light" name="radio_output_style">
+            <label for="radio_output_style_light">光亮</label>
+            <input type="radio" id="radio_output_style_dusk" name="radio_output_style">
+            <label for="radio_output_style_dusk">黃昏</label>
+            <input type="radio" id="radio_output_style_dark" name="radio_output_style" checked="checked">
+            <label for="radio_output_style_dark">黑暗</label>
+        </div>
+
+        <h3>执行模式</h3>
+        <p>一行一行执行你的程式是找出错误的有用方法</p>
+        <div id="radio_run_mode">
+            <input type="radio" id="radio_run_mode_all" name="radio_run_mode" checked="checked">
+            <label for="radio_run_mode_all">整个程序</label>
+            <input type="radio" id="radio_run_mode_single" name="radio_run_mode">
+            <label for="radio_run_mode_single">一行一行执行</label>
+            <input type="radio" id="radio_run_mode_anim" name="radio_run_mode">
+            <label for="radio_run_mode_anim">动画一行一行执行</label>
+        </div>
+        <p>选择较长延迟时间来动画执行每一行, 可以帮助你了解和在执行时说明你的程序代码</p>
+        <label for="txt_step_anim_time">执行每一行的延迟时间:</label>
+        <input type="text" id="txt_step_anim_time" readonly>
+        <div id="slider_step_anim_time" class="slider"></div>
+
+        <p>让输出视窗更透明可以帮助你看清楚后面的程序代码</p>
+        <label for="txt_output_transparency">输出视窗的透明度</label>
+        <input type="text" id="txt_output_transparency" readonly>
+        <div id="slider_output_transparency" class="slider"></div>
+
+    </div>
+<script>
+ var toolsVisible = false;
+
+
+ $(function() {
+  	$('#loading').hide();
+  	$('#holder').show();
+  	PythonIDE.init('normal');
+    setTimeout(function() {
+        //do something special
+        PythonIDE.editor.focus();
+        PythonIDE.editor.setCursor(PythonIDE.editor.lineCount(), 0);
+        PythonIDE.editor.setCursor(0);
+    }, 100);
+ });
+</script>
+
+</body>
+
+</html>
